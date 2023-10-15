@@ -1,9 +1,13 @@
 package me.wanpin.springboot.controller;
 
 import jakarta.validation.Valid;
+import me.wanpin.springboot.dto.CommentDto;
 import me.wanpin.springboot.dto.PostDto;
 import me.wanpin.springboot.entity.Post;
+import me.wanpin.springboot.service.CommentService;
 import me.wanpin.springboot.service.PostService;
+import me.wanpin.springboot.util.ROLE;
+import me.wanpin.springboot.util.SecurityUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -16,17 +20,47 @@ import java.util.Locale;
 public class PostController {
 
     private PostService postService;
+    private CommentService commentService;
 
-    public PostController(PostService postService) {
+    public PostController(PostService postService,CommentService commentService) {
         this.postService = postService;
+        this.commentService = commentService;
     }
 
     // create handler method, GET request and return model and view
     @GetMapping("/admin/posts")
     public String posts(Model model){
-        List<PostDto> posts = postService.findAllPosts();
+        String role = SecurityUtils.getRole();
+        List<PostDto> posts = null;
+        if(ROLE.ROLE_ADMIN.name().equals(role)){
+            posts = postService.findAllPosts();
+        }else {
+            posts = postService.findPostByUser();
+        }
         model.addAttribute("posts", posts);
         return "/admin/posts";
+    }
+
+    //handler method to handle new comments request
+    @GetMapping("/admin/posts/comments")
+    public String postComments(Model model){
+        String role = SecurityUtils.getRole();
+        List<CommentDto> comments = null;
+        if(ROLE.ROLE_ADMIN.name().equals(role)){
+            comments = commentService.findAllComments();
+        }else {
+            comments = commentService.findCommentsByPost();
+        }
+        model.addAttribute("comments",comments);
+        return "admin/comments";
+    }
+
+    // handler method to handle delete comment request
+    @GetMapping("/admin/posts/{commentId}")
+    public String deleteComment(@PathVariable("commentId") Long commentId){
+        commentService.deleteComment(commentId);
+        return "redirect:/admin/posts/comments";
+
     }
 
     // handler method to handle new post request

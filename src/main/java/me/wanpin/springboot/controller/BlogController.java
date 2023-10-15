@@ -1,5 +1,6 @@
 package me.wanpin.springboot.controller;
 
+import me.wanpin.springboot.dto.CommentDto;
 import me.wanpin.springboot.dto.PostDto;
 import me.wanpin.springboot.service.PostService;
 import org.springframework.stereotype.Controller;
@@ -32,6 +33,8 @@ public class BlogController {
     private String showPost(@PathVariable("postUrl") String postUrl,
                             Model model){
         PostDto post = postService.findPostByUrl(postUrl);
+        CommentDto commentDto = new CommentDto();
+        model.addAttribute("comment",commentDto);
         model.addAttribute("post", post);
         return "blog/blog_post";
     }

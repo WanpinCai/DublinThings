@@ -30,7 +30,6 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public void createComment(String postUrl, CommentDto commentDto) {
-
         Post post = postRepository.findByUrl(postUrl).get();
         Comment comment = CommentMapper.mapToComment(commentDto);
         comment.setPost(post);
